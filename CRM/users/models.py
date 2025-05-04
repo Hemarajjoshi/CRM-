@@ -19,6 +19,3 @@ class User(AbstractUser):
     role = models.CharField(max_length = 20 , choices = ROLE_CHOICES)
     company  = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
 
-
-
-

@@ -1,25 +1,55 @@
 from rest_framework import serializers
 from .models import User
+from company.models import Company
+
+
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields= '__all__'
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only = True)
+    company_data = CompanySerializer(write_only = True)
+    company = CompanySerializer(read_only = True)
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'role', 'company' ]
+        fields = ['username', 'email', 'password', 'role', 'company_data', 'company' ]
+
 
     
     def create(self, validated_data):
+
+        company_data = validated_data.pop('company_data')
+        company1 = Company.objects.create(**company_data)
+        validated_data['company'] = company1
+
         user =  User.objects.create_user(
             username = validated_data['username'],
-            password = validated_data['password']
+            password = validated_data['password'],
+            email = validated_data['email']
         )
-
-        user.email = validated_data('email')
-        user.role = validated_data.get('role', 'member')
-        user.company = validated_data.get('company')
+        user.role = validated_data.get('role', '')
+        user.company = company1
         user.save()
+        company1.save()
         return user
+    
+
+    def validate_email(self, value):
+        if User.objects.filter(email= value):
+            raise serializers.ValidationError("Email Already Registered")
+        return value
+    
+    def validate_username(self,value):
+        if User.objects.filter(username = value):
+            raise serializers.ValidationError("Username Already Registered!! Try Another Username")
+        return value
+    
+
     
 
 
