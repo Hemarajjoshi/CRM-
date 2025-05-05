@@ -17,5 +17,5 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     role = models.CharField(max_length = 20 , choices = ROLE_CHOICES)
-    company  = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
+    company  = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, related_name='users')
 
